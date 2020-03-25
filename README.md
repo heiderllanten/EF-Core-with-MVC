@@ -79,3 +79,25 @@ If you want to avoid the read-first approach, but you also want the SQL UPDATE s
 To free up the resources that a database connection holds, the context instance must be disposed as soon as possible when you are done with it. The ASP.NET Core built-in dependency injection takes care of that task for you.
 
 In Startup.cs, you call the AddDbContext extension method to provision the DbContext class in the ASP.NET Core DI container. That method sets the service lifetime to Scoped by default. Scoped means the context object lifetime coincides with the web request life time, and the Dispose method will be called automatically at the end of the web request.
+
+### Handle transactions
+
+By default the Entity Framework implicitly implements transactions. In scenarios where you make changes to multiple rows or tables and then call SaveChanges, the Entity Framework automatically makes sure that either all of your changes succeed or they all fail. If some changes are done first and then an error happens, those changes are automatically rolled back. For scenarios where you need more control -- for example, if you want to include operations done outside of Entity Framework in a transaction -- see Transactions.
+
+### IQueryable Note
+
+The method uses LINQ to Entities to specify the column to sort by. The code creates an IQueryable variable before the switch statement, modifies it in the switch statement, and calls the ToListAsync method after the switch statement. When you create and modify IQueryable variables, no query is sent to the database. The query isn't executed until you convert the IQueryable object into a collection by calling a method such as ToListAsync.
+
+### Case sensitive note in IQueryable
+
+Here you are calling the Where method on an IQueryable object, and the filter will be processed on the server. In some scenarios you might be calling the Where method as an extension method on an in-memory collection. (For example, suppose you change the reference to _context.Students so that instead of an EF DbSet it references a repository method that returns an IEnumerable collection.) The result would normally be the same but in some cases may be different.
+
+For example, the .NET Framework implementation of the Contains method performs a case-sensitive comparison by default, but in SQL Server this is determined by the collation setting of the SQL Server instance. That setting defaults to case-insensitive. You could call the ToUpper method to make the test explicitly case-insensitive: Where(s => s.LastName.ToUpper().Contains(searchString.ToUpper()). That would ensure that results stay the same if you change the code later to use a repository which returns an IEnumerable collection instead of an IQueryable object. (When you call the Contains method on an IEnumerable collection, you get the .NET Framework implementation; when you call it on an IQueryable object, you get the database provider implementation.) However, there's a performance penalty for this solution. The ToUpper code would put a function in the WHERE clause of the TSQL SELECT statement. That would prevent the optimizer from using an index. Given that SQL is mostly installed as case-insensitive, it's best to avoid the ToUpper code until you migrate to a case-sensitive data store.
+
+### <Form> tage helper note
+
+This code uses the <form> tag helper to add the search text box and button. By default, the <form> tag helper submits form data with a POST, which means that parameters are passed in the HTTP message body and not in the URL as query strings. When you specify HTTP GET, the form data is passed in the URL as query strings, which enables users to bookmark the URL.
+
+### Constructor note
+
+Constructors can't run asynchronous code.
