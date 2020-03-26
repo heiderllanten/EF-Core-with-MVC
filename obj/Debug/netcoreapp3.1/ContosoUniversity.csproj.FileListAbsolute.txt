@@ -32,7 +32,6 @@ C:\Users\Heider\source\repos\Studying\EF Core\MVC\ContosoUniversity\obj\Debug\ne
 C:\Users\Heider\source\repos\Studying\EF Core\MVC\ContosoUniversity\obj\Debug\netcoreapp3.1\ContosoUniversity.dll
 C:\Users\Heider\source\repos\Studying\EF Core\MVC\ContosoUniversity\obj\Debug\netcoreapp3.1\ContosoUniversity.pdb
 C:\Users\Heider\source\repos\Studying\EF Core\MVC\ContosoUniversity\obj\Debug\netcoreapp3.1\ContosoUniversity.csproj.CopyComplete
-C:\Users\Heider\source\repos\Studying\EF Core\MVC\ContosoUniversity\obj\Debug\netcoreapp3.1\ContosoUniversity.csprojAssemblyReference.cache
 C:\Users\Heider\source\repos\Studying\EF Core\MVC\ContosoUniversity\bin\Debug\netcoreapp3.1\Microsoft.Bcl.AsyncInterfaces.dll
 C:\Users\Heider\source\repos\Studying\EF Core\MVC\ContosoUniversity\bin\Debug\netcoreapp3.1\Microsoft.Bcl.HashCode.dll
 C:\Users\Heider\source\repos\Studying\EF Core\MVC\ContosoUniversity\bin\Debug\netcoreapp3.1\Microsoft.EntityFrameworkCore.dll

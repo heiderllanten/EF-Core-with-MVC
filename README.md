@@ -101,3 +101,114 @@ This code uses the <form> tag helper to add the search text box and button. By d
 ### Constructor note
 
 Constructors can't run asynchronous code.
+
+### Migration Notes
+
+#### Create Initial Migration
+
+Add-Migration InitialCreate
+Update-Database
+
+#### Remove Migration
+
+Use the dotnet ef migrations remove command to remove a migration. dotnet ef migrations remove deletes the migration and ensures the snapshot is correctly reset. If dotnet ef migrations remove fails, use dotnet ef migrations remove -v to get more information on the failure.
+
+#### Wording for Migrations
+
+It's best to choose a word or phrase that summarizes what is being done in the migration. For example, you might name a later migration "AddDepartmentTable".
+
+#### __EFMigrationsHistory Table
+
+Inspect the database as you did in the first tutorial. You'll notice the addition of an __EFMigrationsHistory table that keeps track of which migrations have been applied to the database.
+
+### Complex Data Model
+
+#### DataType Attribute
+
+- The DataType Enumeration provides for many data types, such as Date, Time, PhoneNumber, Currency, EmailAddress, and more. 
+- The DataType attributes don't provide any validation.
+
+The DataType attribute conveys the semantics of the data as opposed to how to render it on a screen, and provides the following benefits that you don't get with DisplayFormat:
+
+- The browser can enable HTML5 features (for example to show a calendar control, the locale-appropriate currency symbol, email links, some client-side input validation, etc.).
+- By default, the browser will render data using the correct format based on your locale.
+
+[DataType(DataType.Date)]
+
+#### DisplayFormat Attribute
+
+The DisplayFormat attribute is used to explicitly specify the date format that will be displayed
+
+The ApplyFormatInEditMode setting specifies that the formatting should also be applied when the value is displayed in a text box for editing. (You might not want that for some fields -- for example, for currency values, you might not want the currency symbol in the text box for editing.
+
+You can use the DisplayFormat attribute by itself, but it's generally a good idea to use the DataType attribute also.
+
+[DisplayFormat(DataFormatString = "{0:yyyy-MM-dd}", ApplyFormatInEditMode = true)]
+
+### StringLength Attribute
+
+The StringLength attribute sets the maximum length in the database and provides client side and server side validation for ASP.NET Core MVC. You can also specify the minimum string length in this attribute, but the minimum value has no impact on the database schema.
+
+- The MaxLength attribute provides functionality similar to the StringLength attribute but doesn't provide client side validation.
+
+[StringLength(50)]
+
+### RegularExpression Attribute
+
+You can use the RegularExpression attribute to apply restrictions to the input. For example, the following code requires the first character to be upper case and the remaining characters to be alphabetical:
+
+[RegularExpression(@"^[A-Z]+[a-zA-Z""'\s-]*$")]
+
+#### Column Attribute 
+
+- You can also use attributes to control how your classes and properties are mapped to the database.
+
+    [Column("FirstName")]
+
+- Earlier you used the Column attribute to change column name mapping. In the code for the Department entity, the Column attribute is being used to change SQL data type mapping so that the column will be defined using the SQL Server money type in the database:
+
+    [Column(TypeName="money")]
+
+#### Required Attribute
+
+The Required attribute makes the name properties required fields. The Required attribute isn't needed for non-nullable types such as value types (DateTime, int, double, float, etc.). Types that can't be null are automatically treated as required fields.
+
+The Required attribute must be used with MinimumLength for the MinimumLength to be enforced.
+
+[Required]
+[StringLength(50, MinimumLength=2)]
+
+#### Display Attribute
+
+The Display attribute specifies that the caption for the text boxes should be "First Name", "Last Name", "Full Name", and "Enrollment Date" instead of the property name in each instance (which has no space dividing the words).
+
+[Display(Name = "Last Name")]
+
+#### Key attribute
+
+There's a one-to-zero-or-one relationship between the Instructor and the OfficeAssignment entities. An office assignment only exists in relation to the instructor it's assigned to, and therefore its primary key is also its foreign key to the Instructor entity. But the Entity Framework can't automatically recognize InstructorID as the primary key of this entity because its name doesn't follow the ID or classnameID naming convention. Therefore, the Key attribute is used to identify it as the key:
+
+[Key]
+
+#### Foreign Key Properties EF
+
+The Entity Framework doesn't require you to add a foreign key property to your data model when you have a navigation property for a related entity. EF automatically creates foreign keys in the database wherever they're needed and creates shadow properties for them. But having the foreign key in the data model can make updates simpler and more efficient. For example, when you fetch a course entity to edit, the Department entity is null if you don't load it, so when you update the course entity, you would have to first fetch the Department entity. When the foreign key property DepartmentID is included in the data model, you don't need to fetch the Department entity before you update.
+
+#### DatabaseGenerated attribute
+
+The DatabaseGenerated attribute with the None parameter on the CourseID property specifies that primary key values are provided by the user rather than generated by the database.
+
+[DatabaseGenerated(DatabaseGeneratedOption.None)]
+
+#### Composite Key
+
+The only way to identify composite primary keys to EF is by using the fluent API (it can't be done by using attributes).
+
+modelBuilder.Entity<CourseAssignment>()
+    .HasKey(c => new { c.CourseID, c.InstructorID });
+
+#### Fluent API
+
+You can also use the fluent API to specify most of the formatting, validation, and mapping rules that you can do by using attributes. Some attributes such as MinimumLength can't be applied with the fluent API. As mentioned previously, MinimumLength doesn't change the schema, it only applies a client and server side validation rule.
+
+Some developers prefer to use the fluent API exclusively so that they can keep their entity classes "clean." You can mix attributes and fluent API if you want, and there are a few customizations that can only be done by using fluent API, but in general the recommended practice is to choose one of these two approaches and use that consistently as much as possible. If you do use both, note that wherever there's a conflict, Fluent API overrides attributes.
