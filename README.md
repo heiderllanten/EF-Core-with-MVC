@@ -212,3 +212,34 @@ modelBuilder.Entity<CourseAssignment>()
 You can also use the fluent API to specify most of the formatting, validation, and mapping rules that you can do by using attributes. Some attributes such as MinimumLength can't be applied with the fluent API. As mentioned previously, MinimumLength doesn't change the schema, it only applies a client and server side validation rule.
 
 Some developers prefer to use the fluent API exclusively so that they can keep their entity classes "clean." You can mix attributes and fluent API if you want, and there are a few customizations that can only be done by using fluent API, but in general the recommended practice is to choose one of these two approaches and use that consistently as much as possible. If you do use both, note that wherever there's a conflict, Fluent API overrides attributes.
+
+### How to load related data
+
+#### Eager loading
+
+- When the entity is read, related data is retrieved along with it. This typically results in a single join query that retrieves all of the data that's needed. You specify eager loading in Entity Framework Core by using the Include and ThenInclude methods.
+
+- You can retrieve some of the data in separate queries, and EF "fixes up" the navigation properties. That is, EF automatically adds the separately retrieved entities where they belong in navigation properties of previously retrieved entities. For the query that retrieves related data, you can use the Load method instead of a method that returns a list or object, such as ToList or Single.
+
+#### Explicit loading 
+
+When the entity is first read, related data isn't retrieved. You write code that retrieves the related data if it's needed. As in the case of eager loading with separate queries, explicit loading results in multiple queries sent to the database. The difference is that with explicit loading, the code specifies the navigation properties to be loaded. In Entity Framework Core 1.1 you can use the Load method to do explicit loading.
+
+#### Lazy loading 
+
+When the entity is first read, related data isn't retrieved. However, the first time you attempt to access a navigation property, the data required for that navigation property is automatically retrieved. A query is sent to the database each time you try to get data from a navigation property for the first time. Entity Framework Core 1.0 doesn't support lazy loading.
+
+#### Performance considerations loading related data
+
+If you know you need related data for every entity retrieved, eager loading often offers the best performance, because a single query sent to the database is typically more efficient than separate queries for each entity retrieved. For example, suppose that each department has ten related courses. Eager loading of all related data would result in just a single (join) query and a single round trip to the database. A separate query for courses for each department would result in eleven round trips to the database. The extra round trips to the database are especially detrimental to performance when latency is high.
+
+On the other hand, in some scenarios separate queries is more efficient. Eager loading of all related data in one query might cause a very complex join to be generated, which SQL Server can't process efficiently. Or if you need to access an entity's navigation properties only for a subset of a set of the entities you're processing, separate queries might perform better because eager loading of everything up front would retrieve more data than you need. If performance is critical, it's best to test performance both ways in order to make the best choice.
+
+#### Single() method
+
+You use the Single method on a collection when you know the collection will have only one item. The Single method throws an exception if the collection passed to it's empty or if there's more than one item. When you call the Single method, you can also pass in the Where condition instead of calling the Where method separately.
+
+.Single(i => i.ID == id.Value)
+
+#### SingleOrDefault() method
+
