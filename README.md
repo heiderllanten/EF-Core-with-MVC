@@ -243,3 +243,18 @@ You use the Single method on a collection when you know the collection will have
 
 #### SingleOrDefault() method
 
+Returns a default value (null in this case) if the collection is empty.
+
+
+
+
+
+### MVC
+
+#### Controllers Note
+
+Controllers shouldn't be overly complicated by too many responsibilities. To keep controller logic from becoming overly complex, push business logic out of the controller and into the domain model.
+
+#### Filters Note
+
+If you find that your controller actions frequently perform the same kinds of actions, move these common actions into filters.
