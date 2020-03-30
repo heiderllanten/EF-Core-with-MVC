@@ -172,7 +172,6 @@ C:\Users\Heider\source\repos\Studying\EF Core\MVC\ContosoUniversity\obj\Debug\ne
 C:\Users\Heider\source\repos\Studying\EF Core\MVC\ContosoUniversity\obj\Debug\netcoreapp3.1\Razor\Views\Instructors\Details.cshtml.g.cs
 C:\Users\Heider\source\repos\Studying\EF Core\MVC\ContosoUniversity\obj\Debug\netcoreapp3.1\Razor\Views\Instructors\Edit.cshtml.g.cs
 C:\Users\Heider\source\repos\Studying\EF Core\MVC\ContosoUniversity\obj\Debug\netcoreapp3.1\Razor\Views\Instructors\Index.cshtml.g.cs
-C:\Users\Heider\source\repos\Studying\EF Core\MVC\ContosoUniversity\obj\Debug\netcoreapp3.1\ContosoUniversity.csprojAssemblyReference.cache
 C:\Users\Heider\source\repos\Studying\EF Core\MVC\ContosoUniversity\obj\Debug\netcoreapp3.1\Razor\Views\Departments\Create.cshtml.g.cs
 C:\Users\Heider\source\repos\Studying\EF Core\MVC\ContosoUniversity\obj\Debug\netcoreapp3.1\Razor\Views\Departments\Delete.cshtml.g.cs
 C:\Users\Heider\source\repos\Studying\EF Core\MVC\ContosoUniversity\obj\Debug\netcoreapp3.1\Razor\Views\Departments\Details.cshtml.g.cs

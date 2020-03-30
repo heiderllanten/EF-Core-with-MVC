@@ -260,6 +260,17 @@ The Timestamp attribute specifies that this column will be included in the Where
 
 The ModelState.Remove statement is required because ModelState has the old RowVersion value. In the view, the ModelState value for a field takes precedence over the model property values when both are present.
 
+### Inheritance
+
+TPC (able-per-Concrete Class) and TPH (table-per-hierarchy) inheritance patterns generally deliver better performance than TPT (table-per-entity) inheritance patterns, because TPT patterns can result in complex join queries.
+
+#### EF Core Note
+
+TPH is the only inheritance pattern that the Entity Framework Core supports.
+
+### EF Migration Production Note
+
+In a production system you would make corresponding changes to the Down method in case you ever had to use that to go back to the previous database version. For this tutorial you won't be using the Down method.
 
 ### MVC
 
