@@ -268,9 +268,25 @@ TPC (able-per-Concrete Class) and TPH (table-per-hierarchy) inheritance patterns
 
 TPH is the only inheritance pattern that the Entity Framework Core supports.
 
-### EF Migration Production Note
+#### EF Migration Production Note
 
 In a production system you would make corresponding changes to the Down method in case you ever had to use that to go back to the previous database version. For this tutorial you won't be using the Down method.
+
+### Advanced Topics
+
+#### SQL injection attacks note
+
+As is always true when you execute SQL commands in a web application, you must take precautions to protect your site against SQL injection attacks. One way to do that is to use parameterized queries to make sure that strings submitted by a web page can't be interpreted as SQL commands. In this tutorial you'll use parameterized queries when integrating user input into a query.
+
+#### Automatic change detection performance note
+
+The Entity Framework determines how an entity has changed (and therefore which updates need to be sent to the database) by comparing the current values of an entity with the original values. The original values are stored when the entity is queried or attached. Some of the methods that cause automatic change detection are the following:
+
+- DbContext.SaveChanges
+- DbContext.Entry
+- ChangeTracker.Entries
+
+If you're tracking a large number of entities and you call one of these methods many times in a loop, you might get significant performance improvements by temporarily turning off automatic change detection using the ChangeTracker.AutoDetectChangesEnabled property. For example:
 
 ### MVC
 
