@@ -246,7 +246,19 @@ You use the Single method on a collection when you know the collection will have
 Returns a default value (null in this case) if the collection is empty.
 
 
+### Handle Concurrency Conflicts
 
+#### Detecting concurrency conflicts
+
+You can resolve conflicts by handling DbConcurrencyException exceptions that the Entity Framework throws.
+
+#### Add a tracking property
+
+The Timestamp attribute specifies that this column will be included in the Where clause of Update and Delete commands sent to the database. The attribute is called Timestamp because previous versions of SQL Server used a SQL timestamp data type before the SQL rowversion replaced it. The .NET type for rowversion is a byte array.
+
+#### Update rowversion when concurrency conflicts ocurs
+
+The ModelState.Remove statement is required because ModelState has the old RowVersion value. In the view, the ModelState value for a field takes precedence over the model property values when both are present.
 
 
 ### MVC
