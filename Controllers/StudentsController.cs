@@ -1,9 +1,13 @@
-﻿using ContosoUniversity.Data;
+﻿using ContosoUniversity.DAL;
+using ContosoUniversity.DAL.Generic;
+using ContosoUniversity.DAL.Paginated;
+using ContosoUniversity.Data;
 using ContosoUniversity.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 namespace ContosoUniversity.Controllers
@@ -11,10 +15,14 @@ namespace ContosoUniversity.Controllers
     public class StudentsController : Controller
     {
         private readonly SchoolContext _context;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly IStudentRepository _studentRepository;
 
-        public StudentsController(SchoolContext context)
+        public StudentsController(SchoolContext context, IStudentRepository studenRepository, IUnitOfWork unitOfWork)
         {
             _context = context;
+            _studentRepository = studenRepository;
+            _unitOfWork = unitOfWork;
         }
 
         // GET: Students
@@ -37,13 +45,21 @@ namespace ContosoUniversity.Controllers
 
             ViewData["CurrentFilter"] = searchString;
 
-            var students = from s in _context.Students
-                           select s;
+            IQueryable<Student> students;
+            //var students = from s in _context.Students
+            //               select s;
+
+            //if (!String.IsNullOrEmpty(searchString))
+            //{
+            //    students = students.Where(s => s.LastName.Contains(searchString)
+            //                           || s.FirstMidName.Contains(searchString));
+            //}
+
+            Expression<Func<Student, bool>> filter = null;
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                students = students.Where(s => s.LastName.Contains(searchString)
-                                       || s.FirstMidName.Contains(searchString));
+                filter =  s => s.LastName.Contains(searchString) || s.FirstMidName.Contains(searchString);
             }
 
             if (string.IsNullOrEmpty(sortOrder))
@@ -60,16 +76,21 @@ namespace ContosoUniversity.Controllers
 
             if (descending)
             {
-                students = students.OrderByDescending(e => EF.Property<object>(e, sortOrder));
+                //students = students.OrderByDescending(e => EF.Property<object>(e, sortOrder));
+                students = _studentRepository.GetAsQuerable(
+                    filter,
+                    s => s.OrderByDescending(e => EF.Property<object>(e, sortOrder)), "", true);
             }
             else
             {
-                students = students.OrderBy(e => EF.Property<object>(e, sortOrder));
+                //students = students.OrderBy(e => EF.Property<object>(e, sortOrder));
+                students = _studentRepository.GetAsQuerable(
+                    filter,
+                    s => s.OrderBy(e => EF.Property<object>(e, sortOrder)), "", true);
             }
 
             int pageSize = 3;
-            return View(await PaginatedList<Student>.CreateAsync(students.AsNoTracking(),
-                pageNumber ?? 1, pageSize));
+            return View(await PaginatedList<Student>.CreateAsync(students, pageNumber ?? 1, pageSize));
         }
 
         // GET: Students/Details/5
@@ -207,7 +228,7 @@ namespace ContosoUniversity.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var student = await _context.Students.FindAsync(id);
+            var student = await _studentRepository.GetByID(id);
             if (student == null)
             {
                 return RedirectToAction(nameof(Index));
@@ -215,8 +236,8 @@ namespace ContosoUniversity.Controllers
 
             try
             {
-                _context.Students.Remove(student);
-                await _context.SaveChangesAsync();
+                _studentRepository.Delete(student);
+                await _unitOfWork.Commit();
                 return RedirectToAction(nameof(Index));
             }
             catch (DbUpdateException /* ex */)

@@ -18,19 +18,20 @@ namespace ContosoUniversity.DAL
         {
             _repository = repository;
         }
-        public async Task Delete(object id)
-        {
-            await _repository.Delete(id);
-        }
 
         public void Delete(Student student)
         {
             _repository.Delete(student);
         }
 
-        public async Task<IEnumerable<Student>> Get(Expression<Func<Student, bool>> filter = null, Func<IQueryable<Student>, IOrderedQueryable<Student>> orderBy = null, string includeProperties = "")
+        public async Task<IEnumerable<Student>> Get(Expression<Func<Student, bool>> filter = null, Func<IQueryable<Student>, IOrderedQueryable<Student>> orderBy = null, string includeProperties = "", bool asNoTracking = false)
         {
             return await _repository.Get(filter, orderBy, includeProperties);
+        }
+
+        public IQueryable<Student> GetAsQuerable(Expression<Func<Student, bool>> filter = null, Func<IQueryable<Student>, IOrderedQueryable<Student>> orderBy = null, string includeProperties = "", bool asNoTracking = false)
+        {
+            return _repository.GetAsQuerable(filter, orderBy, includeProperties);
         }
 
         public async Task<Student> GetByID(object id)

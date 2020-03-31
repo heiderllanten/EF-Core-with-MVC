@@ -10,21 +10,65 @@ namespace ContosoUniversity.DAL.Generic
 {
     public class GenericRepository<T> : IGenericRepository<T> where T : class
     {
-        internal IUnitOfWork unitOfWork;
-        internal DbSet<T> dbSet;
+        internal IUnitOfWork _unitOfWork;
+        internal DbSet<T> _dbSet;
 
         public GenericRepository(IUnitOfWork unitOfWork)
         {
-            this.unitOfWork = unitOfWork;
-            this.dbSet = unitOfWork.Context.Set<T>();
+            _unitOfWork = unitOfWork;
+            _dbSet = unitOfWork.Context.Set<T>();
         }
 
         public virtual async Task<IEnumerable<T>> Get(
             Expression<Func<T, bool>> filter = null,
             Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
-            string includeProperties = "")
+            string includeProperties = "",
+            bool asNoTracking = false)
         {
-            IQueryable<T> query = dbSet;
+            return await CreateQuerableForGet(filter, orderBy, includeProperties, asNoTracking).ToListAsync();
+        }
+
+        public virtual IQueryable<T> GetAsQuerable(
+            Expression<Func<T, bool>> filter = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+            string includeProperties = "",
+            bool asNoTracking = false)
+        {
+            return CreateQuerableForGet(filter, orderBy, includeProperties, asNoTracking);
+        }
+
+        public virtual async Task<T> GetByID(object id)
+        {
+            return await _dbSet.FindAsync(id);
+        }
+
+        public virtual async Task Insert(T entity)
+        {
+            await _dbSet.AddAsync(entity);
+        }
+
+        public virtual void Delete(T entityToDelete)
+        {
+            if (_unitOfWork.Context.Entry(entityToDelete).State == EntityState.Detached)
+            {
+                _dbSet.Attach(entityToDelete);
+            }
+            _dbSet.Remove(entityToDelete);
+        }
+
+        public virtual void Update(T entityToUpdate)
+        {
+            _dbSet.Attach(entityToUpdate);
+            _unitOfWork.Context.Entry(entityToUpdate).State = EntityState.Modified;
+        }
+
+        private IQueryable<T> CreateQuerableForGet(
+            Expression<Func<T, bool>> filter = null,
+            Func<IQueryable<T>, IOrderedQueryable<T>> orderBy = null,
+            string includeProperties = "",
+            bool asNoTracking = false)
+        {
+            IQueryable<T> query = _dbSet;
 
             if (filter != null)
             {
@@ -37,45 +81,19 @@ namespace ContosoUniversity.DAL.Generic
                 query = query.Include(includeProperty);
             }
 
+            if (asNoTracking)
+            {
+                query = query.AsNoTracking();
+            }
+
             if (orderBy != null)
             {
-                return await orderBy(query).ToListAsync();
+                return orderBy(query);
             }
             else
             {
-                return await query.ToListAsync();
+                return query;
             }
-        }
-
-        public virtual async Task<T> GetByID(object id)
-        {
-            return await dbSet.FindAsync(id);
-        }
-
-        public virtual async Task Insert(T entity)
-        {
-            await dbSet.AddAsync(entity);
-        }
-
-        public virtual async Task Delete(object id)
-        {
-            T entityToDelete = await dbSet.FindAsync(id);
-            Delete(entityToDelete);
-        }
-
-        public virtual void Delete(T entityToDelete)
-        {
-            if (unitOfWork.Context.Entry(entityToDelete).State == EntityState.Detached)
-            {
-                dbSet.Attach(entityToDelete);
-            }
-            dbSet.Remove(entityToDelete);
-        }
-
-        public virtual void Update(T entityToUpdate)
-        {
-            dbSet.Attach(entityToUpdate);
-            unitOfWork.Context.Entry(entityToUpdate).State = EntityState.Modified;
         }
     }
 }
